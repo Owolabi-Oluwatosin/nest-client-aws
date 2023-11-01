@@ -1,18 +1,14 @@
-# Use an official Node.js runtime as the base image
+FROM node:lts-alpine as build 
 
-FROM node:16-alpine
-# Set the working directory within the container
-WORKDIR /website
+WORKDIR /app
 
-# Copy package.json and package-lock.json to the container
-COPY package*.json ./
-
-# Install dependencies
-RUN yarn install
-
-# Copy the rest of the application code to the container
+COPY package.json .
+RUN npm install 
 COPY . .
+RUN npm run build
 
-# Build the React app
-EXPOSE 3000
+FROM nginx
+COPY ./nginx/nginx.conf /etc/nginx/nginx.conf 
+
+COPY --from=build /app/build /usr/share/nginx/html 
 
